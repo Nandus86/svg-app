@@ -7,24 +7,15 @@ RUN apt-get update && \
     ca-certificates \
     gcc \
     libcairo2-dev \
-    libopenjp2-7 \
-    git && \
+    libopenjp2-7 && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Defina o diretório de trabalho
 WORKDIR /app
 
 # Copie o arquivo requirements.txt e instale as dependências Python
 COPY requirements.txt .
 
 RUN pip install --no-cache-dir -r requirements.txt
-
-# Clone o repositório do PyMuPDF
-RUN git clone https://github.com/pymupdf/PyMuPDF.git /tmp/pymupdf
-
-# Instale o PyMuPDF a partir do código clonado
-RUN cd /tmp/pymupdf && \
-    pip install .
 
 # Copie o código da aplicação
 COPY app /app
