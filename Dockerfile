@@ -4,7 +4,15 @@ FROM python:3.11-slim
 # Defina o diretório de trabalho no contêiner
 WORKDIR /app
 
-# Atualize o pip e instale as dependências
+# Instale dependências do sistema necessárias para construir pacotes Python
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    gcc \
+    libffi-dev \
+    libssl-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Atualize o pip
 RUN pip install --upgrade pip
 
 # Copie o arquivo requirements.txt para o diretório de trabalho
