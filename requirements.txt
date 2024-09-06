@@ -3,3 +3,4 @@ cairosvg
 requests
 pydantic
 uvicorn
+PyMuPDF
