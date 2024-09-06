@@ -17,10 +17,12 @@ COPY requirements.txt .
 
 RUN pip install --no-cache-dir -r requirements.txt
 
+
 # Copie o código da aplicação
 COPY app /app
+RUN chmod -R 755 /app
 
 EXPOSE 7000
 
 # Comando para iniciar a aplicação
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "7000"]
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "7000"]
