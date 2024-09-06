@@ -4,4 +4,4 @@ requests
 pydantic
 fitz
 uvicorn
-PyMuPDF
+PyMuPDF==1.24.10
