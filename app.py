@@ -1,5 +1,6 @@
 import os
-from fastapi import FastAPI, UploadFile, File, Form
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException
+from fastapi.responses import FileResponse
 import xml.etree.ElementTree as ET
 import re
 import json
@@ -161,3 +162,11 @@ async def convert_svg_to_png_route(file: UploadFile = File(...)):
         "mensagem": "SVG convertido para PNG com sucesso",
         "png_file_location": png_file_location
     }
+
+@app.get("/temp-files/{file_name}")
+async def get_temp_file(file_name: str):
+    file_path = os.path.join("temp", file_name)
+    if os.path.exists(file_path):
+        return FileResponse(file_path)
+    else:
+        raise HTTPException(status_code=404, detail="File not found")
