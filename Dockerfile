@@ -4,11 +4,12 @@ FROM python:3.10-slim
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     apt-transport-https \
+    ca-certificates \
     gcc \
     libcairo2-dev \
     libopenjp2-7 \
     libtiff5 && \
-    apt-get clean && rm -rf /var/lib/apt/lists/*
+    apt-get update && apt-get upgrade -y
 
 WORKDIR /app
 
