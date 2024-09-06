@@ -19,6 +19,8 @@ RUN chmod -R 755 /app
 
 COPY app.py .
 
+RUN mkdir -p temp
+
 ENV PORT=7000
 ENV HOST=0.0.0.0
 
