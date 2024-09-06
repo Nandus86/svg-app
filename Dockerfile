@@ -4,6 +4,9 @@ FROM python:3.11-slim
 # Defina o diretório de trabalho no contêiner
 WORKDIR /app
 
+# Atualize o pip e instale as dependências
+RUN pip install --upgrade pip
+
 # Copie o arquivo requirements.txt para o diretório de trabalho
 COPY requirements.txt .
 
