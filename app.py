@@ -1,18 +1,14 @@
-import os
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException
+from fastapi import FastAPI, Form, HTTPException
 from fastapi.responses import FileResponse
 import xml.etree.ElementTree as ET
 import re
+import os
 import json
 import cairosvg
 import fitz
 import requests
 
 app = FastAPI()
-
-# Cria a pasta 'temp' se não existir
-if not os.path.exists('temp'):
-    os.makedirs('temp')
 
 # Função para pegar cores válidas no formato HEX, RGB ou nomes de cores conhecidos
 def extract_colors(style_string):
@@ -87,13 +83,15 @@ def convert_pdf_to_svg(pdf_file_path, svg_output_path):
 def convert_svg_to_png(svg_file_path, output_png_path):
     cairosvg.svg2png(url=svg_file_path, write_to=output_png_path, background_color=None)
 
-# 1. Conta as cores no SVG (recebendo arquivo binário)
+# 1. Conta as cores no SVG (URL do SVG)
 @app.post("/count-colors/")
-async def count_colors(file: UploadFile = File(...)):
-    file_location = f"temp/{file.filename}"
+async def count_colors(svg_url: str = Form(...)):
+    file_location = "temp/temp_input.svg"
     
+    # Faz o download do SVG a partir da URL
+    response = requests.get(svg_url)
     with open(file_location, "wb+") as f:
-        f.write(await file.read())
+        f.write(response.content)
     
     unique_colors = get_svg_colors(file_location)
     
@@ -123,14 +121,16 @@ async def convert_pdf_to_svg_route(pdf_url: str = Form(...)):
 
     return {"mensagem": "PDF convertido para SVG com sucesso", "svg_file_location": svg_file_location}
 
-# 3. Substitui as cores no SVG (recebendo arquivo binário)
+# 3. Substitui as cores no SVG (recebendo URL e JSON via Form)
 @app.post("/replace-svg-colors/")
-async def replace_svg_colors_route(file: UploadFile = File(...), color_data: str = Form(...)):
-    input_file = f"temp/temp_{file.filename}"
-    output_file = f"temp/new_{file.filename}"
+async def replace_svg_colors_route(svg_url: str = Form(...), color_data: str = Form(...)):
+    input_file = "temp/temp_input.svg"
+    output_file = "temp/new_output.svg"
 
+    # Faz o download do SVG a partir da URL
+    response = requests.get(svg_url)
     with open(input_file, "wb+") as f:
-        f.write(await file.read())
+        f.write(response.content)
 
     color_data_dict = json.loads(color_data)
     color_mapping = {color['old']: color['new'] for color in color_data_dict['cores']}
@@ -145,13 +145,15 @@ async def replace_svg_colors_route(file: UploadFile = File(...), color_data: str
         "output_svg_file": output_file
     }
 
-# 4. Converte o SVG final para PNG (recebendo arquivo binário)
+# 4. Converte o SVG final para PNG (URL do SVG)
 @app.post("/convert-svg-to-png/")
-async def convert_svg_to_png_route(file: UploadFile = File(...)):
-    svg_file_location = f"temp/temp_{file.filename}"
+async def convert_svg_to_png_route(svg_url: str = Form(...)):
+    svg_file_location = "temp/temp_input.svg"
     
+    # Faz o download do SVG a partir da URL
+    response = requests.get(svg_url)
     with open(svg_file_location, "wb+") as f:
-        f.write(await file.read())
+        f.write(response.content)
 
     png_file_location = svg_file_location.replace(".svg", ".png")
 
@@ -163,6 +165,7 @@ async def convert_svg_to_png_route(file: UploadFile = File(...)):
         "png_file_location": png_file_location
     }
 
+# 5. Rota para pegar os arquivos na pasta temp
 @app.get("/temp-files/{file_name}")
 async def get_temp_file(file_name: str):
     file_path = os.path.join("temp", file_name)
