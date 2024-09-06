@@ -14,7 +14,7 @@ WORKDIR /app
 
 # Copie o arquivo requirements.txt e instale as dependências Python
 COPY requirements.txt ./
-COPY app.py ./
+COPY app.py ./app/
 
 RUN pip install --no-cache-dir --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
