@@ -8,7 +8,7 @@ WORKDIR /app
 COPY ./app /app
 
 # Copie o requirements.txt para o contêiner
-COPY requirements.txt /app/
+COPY requirements.txt 
 
 # Instale as dependências
 RUN pip install --no-cache-dir -r requirements.txt
