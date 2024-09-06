@@ -1,13 +1,17 @@
+import os
 from fastapi import FastAPI, UploadFile, File, Form
 import xml.etree.ElementTree as ET
 import re
-import os
 import json
 import cairosvg
 import fitz
 import requests
 
 app = FastAPI()
+
+# Cria a pasta 'temp' se não existir
+if not os.path.exists('temp'):
+    os.makedirs('temp')
 
 # Função para pegar cores válidas no formato HEX, RGB ou nomes de cores conhecidos
 def extract_colors(style_string):
@@ -83,9 +87,9 @@ def convert_svg_to_png(svg_file_path, output_png_path):
     cairosvg.svg2png(url=svg_file_path, write_to=output_png_path, background_color=None)
 
 # 1. Conta as cores no SVG (recebendo arquivo binário)
-@app.post("/count-colors")
+@app.post("/count-colors/")
 async def count_colors(file: UploadFile = File(...)):
-    file_location = f"temp_{file.filename}"
+    file_location = f"temp/{file.filename}"
     
     with open(file_location, "wb+") as f:
         f.write(await file.read())
@@ -102,9 +106,9 @@ async def count_colors(file: UploadFile = File(...)):
     }
 
 # 2. Converte o PDF para SVG diretamente da URL
-@app.post("/convert-pdf-to-svg")
+@app.post("/convert-pdf-to-svg/")
 async def convert_pdf_to_svg_route(pdf_url: str = Form(...)):
-    pdf_file_location = "temp_input.pdf"
+    pdf_file_location = "temp/temp_input.pdf"
     
     # Faz o download do PDF a partir da URL
     response = requests.get(pdf_url)
@@ -119,10 +123,10 @@ async def convert_pdf_to_svg_route(pdf_url: str = Form(...)):
     return {"mensagem": "PDF convertido para SVG com sucesso", "svg_file_location": svg_file_location}
 
 # 3. Substitui as cores no SVG (recebendo arquivo binário)
-@app.post("/replace-svg-colors")
+@app.post("/replace-svg-colors/")
 async def replace_svg_colors_route(file: UploadFile = File(...), color_data: str = Form(...)):
-    input_file = f"temp_{file.filename}"
-    output_file = f"new_{file.filename}"
+    input_file = f"temp/temp_{file.filename}"
+    output_file = f"temp/new_{file.filename}"
 
     with open(input_file, "wb+") as f:
         f.write(await file.read())
@@ -141,9 +145,9 @@ async def replace_svg_colors_route(file: UploadFile = File(...), color_data: str
     }
 
 # 4. Converte o SVG final para PNG (recebendo arquivo binário)
-@app.post("/convert-svg-to-png")
+@app.post("/convert-svg-to-png/")
 async def convert_svg_to_png_route(file: UploadFile = File(...)):
-    svg_file_location = f"temp_{file.filename}"
+    svg_file_location = f"temp/temp_{file.filename}"
     
     with open(svg_file_location, "wb+") as f:
         f.write(await file.read())
