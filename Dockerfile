@@ -6,7 +6,7 @@ WORKDIR /app
 
 # Instale as dependências do sistema
 RUN apt-get update && \
-    apt-get install -y gcc build-essential && \
+    apt-get install -y gcc build-essential libcairo2-dev && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
