@@ -13,13 +13,12 @@ RUN apt-get update && \
 WORKDIR /app
 
 # Copie o arquivo requirements.txt e instale as dependências Python
-COPY requirements.txt .
+COPY requirements.txt ./
+COPY app.py ./
 
+RUN pip install --no-cache-dir --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
-
-# Copie o código da aplicação
-COPY app /app
 RUN chmod -R 755 /app
 
 EXPOSE 7000
