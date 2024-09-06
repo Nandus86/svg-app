@@ -1,6 +1,0 @@
-fastapi
-cairosvg
-requests
-pydantic
-fitz
-uvicorn
