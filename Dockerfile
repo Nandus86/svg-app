@@ -1,20 +1,23 @@
-# Use a imagem base do tiangolo
-FROM tiangolo/uvicorn-gunicorn-fastapi:python3.9
+# Use a imagem base do Python
+FROM python:3.11-slim
 
-# Define o diretório de trabalho
+# Defina o diretório de trabalho no contêiner
 WORKDIR /app
 
-# Copie o código da aplicação para o contêiner
-COPY ./app /app
-
-# Copie o requirements.txt para o contêiner
-COPY requirements.txt 
+# Copie o arquivo requirements.txt para o diretório de trabalho
+COPY requirements.txt .
 
 # Instale as dependências
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Exponha a porta padrão
+# Copie o código da aplicação para o diretório de trabalho
+COPY . .
+
+# Defina a variável de ambiente para o FastAPI
+ENV UVICORN_CMD="uvicorn app:app --host 0.0.0.0 --port 7000"
+
+# Exponha a porta em que a aplicação será executada
 EXPOSE 7000
 
-# Comando para rodar o servidor
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "7000"]
+# Comando para executar a aplicação FastAPI
+CMD ["sh", "-c", "$UVICORN_CMD"]
