@@ -7,8 +7,7 @@ RUN apt-get update && \
     ca-certificates \
     gcc \
     libcairo2-dev \
-    libopenjp2-7 \
-    libtiff5 && \
+    libopenjp2-7 && \
     apt-get update && apt-get upgrade -y
 
 WORKDIR /app
