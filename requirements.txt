@@ -4,3 +4,4 @@ requests
 pydantic
 fitz
 uvicorn
+PyMuPDF
