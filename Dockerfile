@@ -3,6 +3,7 @@ FROM python:3.10-slim
 # Atualize os repositórios e instale dependências do sistema necessárias
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
+    apt-transport-https \
     gcc \
     libcairo2-dev \
     libopenjp2-7 \
