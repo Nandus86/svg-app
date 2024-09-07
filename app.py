@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Form, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse
 import xml.etree.ElementTree as ET
 import re
@@ -83,9 +83,15 @@ def convert_pdf_to_svg(pdf_file_path, svg_output_path):
 def convert_svg_to_png(svg_file_path, output_png_path):
     cairosvg.svg2png(url=svg_file_path, write_to=output_png_path, background_color=None)
 
-# 1. Conta as cores no SVG (URL do SVG)
+# 1. Conta as cores no SVG (URL do SVG no corpo do JSON)
 @app.post("/count-colors/")
-async def count_colors(svg_url: str = Form(...)):
+async def count_colors(request: Request):
+    data = await request.json()
+    svg_url = data.get("url")
+    
+    if not svg_url:
+        raise HTTPException(status_code=400, detail="URL não fornecida no JSON")
+    
     file_location = "temp/temp_input.svg"
     
     # Faz o download do SVG a partir da URL
@@ -104,9 +110,15 @@ async def count_colors(svg_url: str = Form(...)):
         "cores": colors_response
     }
 
-# 2. Converte o PDF para SVG diretamente da URL
+# 2. Converte o PDF para SVG diretamente da URL (fornecida no JSON)
 @app.post("/convert-pdf-to-svg/")
-async def convert_pdf_to_svg_route(pdf_url: str = Form(...)):
+async def convert_pdf_to_svg_route(request: Request):
+    data = await request.json()
+    pdf_url = data.get("url")
+    
+    if not pdf_url:
+        raise HTTPException(status_code=400, detail="URL não fornecida no JSON")
+    
     pdf_file_location = "temp/temp_input.pdf"
     
     # Faz o download do PDF a partir da URL
@@ -121,9 +133,16 @@ async def convert_pdf_to_svg_route(pdf_url: str = Form(...)):
 
     return {"mensagem": "PDF convertido para SVG com sucesso", "svg_file_location": svg_file_location}
 
-# 3. Substitui as cores no SVG (recebendo URL e JSON via Form)
+# 3. Substitui as cores no SVG (recebendo URL e mapeamento de cores no JSON)
 @app.post("/replace-svg-colors/")
-async def replace_svg_colors_route(svg_url: str = Form(...), color_data: str = Form(...)):
+async def replace_svg_colors_route(request: Request):
+    data = await request.json()
+    svg_url = data.get("url")
+    color_data = data.get("cores")
+    
+    if not svg_url or not color_data:
+        raise HTTPException(status_code=400, detail="Dados incompletos no JSON")
+    
     input_file = "temp/temp_input.svg"
     output_file = "temp/new_output.svg"
 
@@ -132,8 +151,7 @@ async def replace_svg_colors_route(svg_url: str = Form(...), color_data: str = F
     with open(input_file, "wb+") as f:
         f.write(response.content)
 
-    color_data_dict = json.loads(color_data)
-    color_mapping = {color['old']: color['new'] for color in color_data_dict['cores']}
+    color_mapping = {color['old']: color['new'] for color in color_data}
 
     substitution_details = replace_svg_colors(input_file, output_file, color_mapping)
     
@@ -145,9 +163,15 @@ async def replace_svg_colors_route(svg_url: str = Form(...), color_data: str = F
         "output_svg_file": output_file
     }
 
-# 4. Converte o SVG final para PNG (URL do SVG)
+# 4. Converte o SVG para PNG (URL do SVG no JSON)
 @app.post("/convert-svg-to-png/")
-async def convert_svg_to_png_route(svg_url: str = Form(...)):
+async def convert_svg_to_png_route(request: Request):
+    data = await request.json()
+    svg_url = data.get("url")
+    
+    if not svg_url:
+        raise HTTPException(status_code=400, detail="URL não fornecida no JSON")
+    
     svg_file_location = "temp/temp_input.svg"
     
     # Faz o download do SVG a partir da URL
